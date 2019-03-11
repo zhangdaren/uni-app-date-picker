@@ -7,7 +7,7 @@ uni-app 酒店日期选择插件
 
 ps：代码自己都有了，样式、文字可以自行修改，后面考虑加入参数配置。
 
-部分代码来源于：[](https://github.com/zrxisme/date-for-wx)。
+部分代码来源于：[https://github.com/zrxisme/date-for-wx](https://github.com/zrxisme/date-for-wx)。
 
 ---
 ## 效果图：
