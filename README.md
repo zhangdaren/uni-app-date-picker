@@ -9,7 +9,7 @@ ps：代码自己都有了，样式、文字可以自行修改，后面考虑加
 
 ---
 ## 效果图：
-![效果图](https://zhangdaren.github.io/uni-app-date-picker/static/gif.gif)
+![效果图](https://zhangdaren.github.io/uni-app-date-picker/static/date-picker/gif.gif)
 
 
 ---
