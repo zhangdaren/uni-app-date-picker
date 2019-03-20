@@ -1,6 +1,6 @@
 <template>
 	<view class="content">
-		<calendar></calendar>
+		<calendar @change="change"></calendar>
 	</view>
 </template>
 
@@ -18,6 +18,15 @@
 
 		},
 		methods: {
+			change(choiceDate, dayCount)
+			{
+				//参数解释
+				//1.choiceDate 时间区间（开始时间和结束时间）
+				//2.dayCount 共多少晚
+				
+				console.dir(choiceDate)
+				console.log("入住从 "+ choiceDate[0].re + "  到 " + choiceDate[1].re + "  共 " + dayCount +" 晚");
+			}
 		}
 	}
 </script>

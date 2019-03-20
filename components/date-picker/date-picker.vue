@@ -12,11 +12,11 @@
 
 		<view class='calendar-layer' :animation='animationData'>
 			<!-- 遮罩层 -->
-			<view class='layer-white-space' @tap='hideCalendar'></view>
+			<view class='layer-white-space' @tap='hideCalendar(false)'></view>
 
 			<view class='layer-content' :class="choice ? 'choiceDate' : ''">
 				<view class="layer-header">
-					<icon class="layer-close" @tap='hideCalendar'></icon>
+					<icon class="layer-close" @tap='hideCalendar(false)'></icon>
 					<text class="layer-title">选择日期</text>
 				</view>
 				<!--  -->
@@ -98,18 +98,31 @@
 				fixedId: '',
 				layerTop: 0,
 				isShowDialog: false,
+				//用来重置的
+				bak_date: [],
+				bak_weeks: [],
+				bak_choiceDate: [],
+				bak_choiceDateArr: [],
 			}
 		},
 		components: {},
 		onLoad() {
+			//#ifndef H5
 			// 弹出层动画创建
 			this.animation = uni.createAnimation({
 				duration: 400, // 整个动画过程花费的时间，单位为毫秒
 				timingFunction: "ease", // 动画的类型
 				delay: 0 // 动画延迟参数
 			})
+			//#endif
+
 			this.dateData();
 			// this.showCalendar();
+		},
+		created() {
+			//#ifdef H5
+			this.dateData();
+			//#endif
 		},
 		methods: {
 			getLayerTop: function() {
@@ -144,6 +157,12 @@
 				if (isInitRectData == false) this.monthTitleRectList = await this.getMonthTitleRectList();
 			},
 			showCalendar: function() {
+				//存储未更新前的数据
+				this.bak_date = JSON.parse(JSON.stringify(this.date));
+				this.bak_weeks = JSON.parse(JSON.stringify(this.weeks));
+				this.bak_choiceDate = JSON.parse(JSON.stringify(this.choiceDate));
+				this.bak_choiceDateArr = JSON.parse(JSON.stringify(this.choiceDateArr));
+
 				// 设置动画内容为：使用绝对定位显示区域，高度变为100%
 				this.animation.bottom("0px").height("100%").step();
 				this.animationData = this.animation.export();
@@ -151,11 +170,24 @@
 					this.isShowDialog = true;
 				}, 400);
 			},
-			hideCalendar: function() {
+			hideCalendar: function(isBtnClick) {
 				// 设置动画内容为：使用绝对定位隐藏整个区域，高度变为0
 				this.animation.bottom("-100%").height("0upx").step();
 				this.animationData = this.animation.export();
 				this.isShowDialog = false;
+				//SubmitisBtnClick判断是否为按钮点击
+				if(isBtnClick) return;
+				
+				//非按钮点击则重置已选择的
+				this.dateFlag = {};
+				this.choice = "";
+				this.dayCount = 1;
+				this.dayCount2 = "共" + this.dayCount + "晚";
+				//
+				this.date = JSON.parse(JSON.stringify(this.bak_date));
+				this.weeks = JSON.parse(JSON.stringify(this.bak_weeks));
+				this.choiceDate = JSON.parse(JSON.stringify(this.bak_choiceDate));
+				this.choiceDateArr = JSON.parse(JSON.stringify(this.bak_choiceDateArr));
 			},
 			setData: function(obj) {
 				let that = this;
@@ -465,15 +497,28 @@
 			},
 			submitbtn: function() {
 				this.choiceDate[0] = this.choiceDateArr[0];
-				this.choiceDate[1] = this.choiceDateArr[this.choiceDateArr.length-1];
+				this.choiceDate[1] = this.choiceDateArr[this.choiceDateArr.length - 1];
 				this.dayCount2 = "共" + this.dayCount + "晚";
-				this.hideCalendar();
+				this.hideCalendar(true);
+				/**派发事件 
+				 * 参数：
+				 * 1.choiceDate 时间区间（开始时间和结束时间）
+				 * 2.dayCount 共多少晚
+				 */
+				this.$emit("change", this.choiceDate, this.dayCount);
 			},
 		},
 	}
 </script>
 
 <style lang="scss">
+	//#ifdef H5
+	.uni-view {
+		display: flex;
+	}
+
+	//#endif
+
 	.layer-white-space {
 		position: fixed;
 		height: 100%;
