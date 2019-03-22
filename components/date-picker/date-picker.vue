@@ -530,6 +530,13 @@
 </script>
 
 <style lang="scss" scoped>
+	/*  #ifndef  H5  */
+	view {
+		display: flex;
+	}
+	/*  #endif  */
+	
+	
 	/*  #ifdef  H5  */
 	uni-view {
 		display: flex;
