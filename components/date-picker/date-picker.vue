@@ -10,13 +10,13 @@
 			<text class='sumCount'>{{dayCount2}}</text>
 		</view>
 
-		<view class='calendar-layer' :animation='animationData'>
+		<view class='calendar-layer' :animation='animationData' :class="isShow ? 'show' : 'hide'">
 			<!-- 遮罩层 -->
 			<view class='layer-white-space' @tap='hideCalendar(false)'></view>
 
 			<view class='layer-content' :class="choice ? 'choiceDate' : ''">
 				<view class="layer-header">
-					<icon class="layer-close" @tap='hideCalendar(false)'></icon>
+					<view class="layer-close" @tap='hideCalendar(false)'></view>
 					<text class="layer-title">选择日期</text>
 				</view>
 				<!--  -->
@@ -97,12 +97,13 @@
 				monthTitleRectList: [],
 				fixedId: '',
 				layerTop: 0,
-				isShowDialog: false,
 				//用来重置的
 				bak_date: [],
 				bak_weeks: [],
 				bak_choiceDate: [],
 				bak_choiceDateArr: [],
+
+				isShow: "",
 			}
 		},
 		components: {},
@@ -163,21 +164,34 @@
 				this.bak_choiceDate = JSON.parse(JSON.stringify(this.choiceDate));
 				this.bak_choiceDateArr = JSON.parse(JSON.stringify(this.choiceDateArr));
 
+				///////////////////非非非h5平台适配//////////////////
+				//#ifndef H5
 				// 设置动画内容为：使用绝对定位显示区域，高度变为100%
 				this.animation.bottom("0px").height("100%").step();
 				this.animationData = this.animation.export();
-				setTimeout(() => {
-					this.isShowDialog = true;
-				}, 400);
+				//#endif
+
+				///////////////////h5平台适配//////////////////
+				//#ifdef H5
+				this.isShow = true;
+				//#endif
 			},
 			hideCalendar: function(isBtnClick) {
+				///////////////////非非非h5平台适配//////////////////
+				//#ifndef H5
 				// 设置动画内容为：使用绝对定位隐藏整个区域，高度变为0
 				this.animation.bottom("-100%").height("0upx").step();
 				this.animationData = this.animation.export();
-				this.isShowDialog = false;
+				//#endif
+
+				///////////////////h5平台适配//////////////////
+				//#ifdef H5
+				this.isShow = false;
+				//#endif
+
 				//SubmitisBtnClick判断是否为按钮点击
-				if(isBtnClick) return;
-				
+				if (isBtnClick) return;
+
 				//非按钮点击则重置已选择的
 				this.dateFlag = {};
 				this.choice = "";
@@ -467,6 +481,7 @@
 					} else {
 						this.dateFlag = {};
 						this.choice = true;
+						console.log("count", count)
 						this.dayCount = count + 1;
 						this.dayCount2 = "共" + (count + 1) + "晚";
 					}
@@ -505,19 +520,23 @@
 				 * 1.choiceDate 时间区间（开始时间和结束时间）
 				 * 2.dayCount 共多少晚
 				 */
-				this.$emit("change", this.choiceDate, this.dayCount);
+				this.$emit("change", {
+					choiceDate: this.choiceDate,
+					dayCount: this.dayCount
+				});
 			},
 		},
 	}
 </script>
 
-<style lang="scss">
-	//#ifdef H5
-	.uni-view {
+<style lang="scss" scoped>
+	/*  #ifdef  H5  */
+	uni-view {
 		display: flex;
 	}
 
-	//#endif
+	/*  #endif  */
+
 
 	.layer-white-space {
 		position: fixed;
@@ -580,6 +599,23 @@
 		width: 100%;
 		overflow: hidden;
 		z-index: 1111;
+
+		/*  #ifdef  H5  */
+		//h5使用css3动画
+		&.show {
+			bottom: 0;
+			height: 100%;
+			transition: bottom 0.4s;
+		}
+
+		//h5使用css3动画
+		&.hide {
+			bottom: -100%;
+			height: 100%;
+			transition: bottom 0.4s;
+		}
+
+		/*  #endif  */
 	}
 
 	.layer-content {
@@ -632,7 +668,7 @@
 		border-radius: 10upx;
 		margin: 20upx 50upx;
 		justify-content: center;
-		font-size: 16px;
+		font-size: 32upx;
 		background: linear-gradient(to right, #F5504F, #F43F4F);
 	}
 
@@ -718,8 +754,17 @@
 
 		.beginTip {
 			display: none;
+			//////////////////////////////
+			/*  #ifndef  H5  */
 			width: 115upx;
 			margin-top: -70upx;
+			/*  #endif  */
+			//////////////////////////////
+			/*  #ifdef  H5  */
+			width: 130upx;
+			margin-top: -74upx;
+			/*  #endif  */
+			//////////////////////////////
 			position: absolute;
 			background: rgba(0, 0, 0, 0.6);
 			border-radius: 5upx;
@@ -731,10 +776,19 @@
 			&::after {
 				content: "";
 				position: absolute;
+				/*  #ifndef  H5  */
 				left: 35%;
 				top: 28upx;
-				border: 5px solid transparent;
-				border-top: 6px solid rgba($color: #000000, $alpha: 0.6);
+				border: 5upx solid transparent;
+				border-top: 6upx solid rgba($color: #000000, $alpha: 0.6);
+				/*  #endif  */
+
+				/*  #ifdef  H5  */
+				left: 35%;
+				top: 37upx;
+				border: 8upx solid transparent;
+				border-top: 10upx solid rgba($color: #000000, $alpha: 0.6);
+				/*  #endif  */
 			}
 		}
 
@@ -746,7 +800,15 @@
 			text-align: center;
 			padding: 6upx 10upx;
 			// min-width: 70upx;
+			//////////////////////////////
+			/*  #ifndef  H5  */
 			margin-top: -70upx;
+			/*  #endif  */
+			//////////////////////////////
+			/*  #ifdef  H5  */
+			margin-top: -74upx;
+			/*  #endif  */
+			//////////////////////////////
 			font-size: 16upx;
 			left: 12%;
 			z-index: 33;
@@ -754,10 +816,20 @@
 			&::after {
 				content: "";
 				position: absolute;
+
+				/*  #ifndef  H5  */
 				left: 35%;
 				top: 28upx;
-				border: 5px solid transparent;
-				border-top: 6px solid rgba($color: #000000, $alpha: 0.6);
+				border: 5upx solid transparent;
+				border-top: 6upx solid rgba($color: #000000, $alpha: 0.6);
+				/*  #endif  */
+
+				/*  #ifdef  H5  */
+				left: 35%;
+				top: 37upx;
+				border: 8upx solid transparent;
+				border-top: 10upx solid rgba($color: #000000, $alpha: 0.6);
+				/*  #endif  */
 			}
 		}
 
@@ -819,7 +891,7 @@
 		width: 100%;
 		bottom: 0;
 		left: 0;
-		border-top: 1px solid #eee;
+		border-top: 1upx solid #eee;
 		transform-origin: 0 100%;
 		transform: scaleY(0.5);
 	}
