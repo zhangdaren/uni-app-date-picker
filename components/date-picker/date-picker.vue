@@ -1,6 +1,6 @@
 <template>
 	<view>
-		<view class="order-time" @tap="showCalendar()">
+		<view class="order-time" @tap="showCalendar()" v-if="!modal">
 			<text class="goInHotel">入住</text>
 			<text class="date-wrappper">{{ choiceDate[0].month }}月{{ choiceDate[0].day }}日</text>
 			<text class="goInHotel2" v-if="choiceDate[0].year + '' + choiceDate[0].month + '' + choiceDate[0].day == today">今天</text>
@@ -15,11 +15,11 @@
 			<text class="sumCount">{{ dayCount2 }}</text>
 		</view>
 
-		<view class="calendar-layer" :animation="animationData" :class="isShow ? 'show' : 'hide'">
+		<view class="calendar-layer" :animation="animationData" :class="isShow_H5 ? 'show' : 'hide'">
 			<!-- 遮罩层 -->
 			<view class="layer-white-space" @tap="hideCalendar(false)"></view>
 
-			<view class="layer-content choiceDate">
+			<view class="layer-content" :class="{ choiceDate: choice === true }">
 				<view class="layer-header">
 					<view class="layer-close" @tap="hideCalendar(false)"></view>
 					<text class="layer-title">选择日期</text>
@@ -32,7 +32,7 @@
 					<!--  -->
 					<scroll-view class="layer-list" scroll-y="true">
 						<view v-for="(monthData, index) in date" :key="index" class="month">
-							<view class="month-title" :id="'m-' + monthData[0].year + '-' + monthData[0].month" :style="'z-index:' + index">
+							<view class="month-title" :class="'m-' + monthData[0].year + '-' + monthData[0].month" :style="'z-index:' + index">
 								{{ monthData[0].year + '年' + monthData[0].month + '月' }}
 							</view>
 							<view class="month-content">
@@ -53,6 +53,7 @@
 									@tap="selectday"
 								>
 									<view class="day-content">
+										<!-- <text class="day-subject">{{ data.week }}</text> -->
 										<text class="day-subject">
 											{{ data.dateTime != today && data.dateTime != tomorrow && data.dateTime != afterTomorrow ? data.act.subject : '' }}
 										</text>
@@ -69,7 +70,7 @@
 					</scroll-view>
 				</view>
 				<!--  -->
-				<view class="layer-footer"><view class="submitBtn" @tap="submitbtn">完成</view></view>
+				<view class="layer-footer"><view class="submitBtn" @tap="submitbtn" v-if="choice === true">完成</view></view>
 			</view>
 		</view>
 	</view>
@@ -125,8 +126,10 @@ export default {
 			bak_weeks: [],
 			bak_choiceDate: [],
 			bak_choiceDateArr: [],
-
-			isShow: ''
+			bak_dayCount: 1,
+			isShow_H5: '',  //用于表示H5平台显示隐藏状态
+			isShow_NoH5: false,  //用于表示非H5平台显示隐藏状态
+			tmpWeekArr: {} //临时数组
 		};
 	},
 	props: {
@@ -135,45 +138,57 @@ export default {
 		},
 		endDate: {
 			type: String
+		},
+		modal: {
+			type: Boolean,
+			default: false //默认为有界面的
+		},
+		show: {
+			type: Boolean,
+			default: false //默认不显示
 		}
 	},
 	components: {},
 	onLoad() {
-		//#ifndef H5
-		// 弹出层动画创建
-		this.animation = uni.createAnimation({
-			duration: 400, // 整个动画过程花费的时间，单位为毫秒
-			timingFunction: 'ease', // 动画的类型
-			delay: 0 // 动画延迟参数
-		});
-		//#endif
-
-		this.dateData();
-		// this.showCalendar();
+		this.init();
 	},
 	created() {
-		//#ifndef H5
-		// 弹出层动画创建
-		this.animation = uni.createAnimation({
-			duration: 400, // 整个动画过程花费的时间，单位为毫秒
-			timingFunction: 'ease', // 动画的类型
-			delay: 0 // 动画延迟参数
-		});
-		//#endif
-
-		this.dateData();
+		this.init();
 	},
-	// watch: {
-	// 	beginDate: function(newVal, oldVal) {
-	// 		var that = this;
-	// 		console.log(newVal, oldVal);
-	// 	},
-	// 	endDate: function(newVal, oldVal) {
-	// 		var that = this;
-	// 		console.log(newVal, oldVal);
-	// 	}
-	// },
+	watch: {
+		show: function(newVal, oldVal) {
+			this.isShow_NoH5 ? this.hideCalendar() : this.showCalendar() ;
+		}
+		// 	beginDate: function(newVal, oldVal) {
+		// 		var that = this;
+		// 		console.log(newVal, oldVal);
+		// 	},
+		// 	endDate: function(newVal, oldVal) {
+		// 		var that = this;
+		// 		console.log(newVal, oldVal);
+		// 	}
+	},
 	methods: {
+		init() {
+			//#ifndef H5
+			// 弹出层动画创建
+			this.animation = uni.createAnimation({
+				duration: 400, // 整个动画过程花费的时间，单位为毫秒
+				timingFunction: 'ease', // 动画的类型
+				delay: 0 // 动画延迟参数
+			});
+			//#endif
+
+			this.dateData();
+
+			if (this.modal) {
+				//如果是弹窗模式，那么初始时就派发change事件
+				this.$emit('change', {
+					choiceDate: this.choiceDate,
+					dayCount: this.dayCount
+				});
+			}
+		},
 		getLayerTop: function() {
 			return new Promise(resolve => {
 				//获取layer-list窗器的top
@@ -213,6 +228,7 @@ export default {
 			this.bak_weeks = JSON.parse(JSON.stringify(this.weeks));
 			this.bak_choiceDate = JSON.parse(JSON.stringify(this.choiceDate));
 			this.bak_choiceDateArr = JSON.parse(JSON.stringify(this.choiceDateArr));
+			this.bak_dayCount = this.dayCount;
 
 			///////////////////非非非h5平台适配//////////////////
 			//#ifndef H5
@@ -222,14 +238,16 @@ export default {
 				.height('100%')
 				.step();
 			this.animationData = this.animation.export();
+			this.isShow_NoH5 = true;
 			//#endif
 
 			///////////////////h5平台适配//////////////////
 			//#ifdef H5
-			this.isShow = true;
+			this.isShow_H5 = true;
 			//#endif
 		},
 		hideCalendar: function(isBtnClick) {
+			console.log('h 1');
 			///////////////////非非非h5平台适配//////////////////
 			//#ifndef H5
 			// 设置动画内容为：使用绝对定位隐藏整个区域，高度变为0
@@ -238,26 +256,30 @@ export default {
 				.height('0upx')
 				.step();
 			this.animationData = this.animation.export();
+			this.isShow_NoH5 = false;
 			//#endif
 
+			console.log('h 2');
 			///////////////////h5平台适配//////////////////
 			//#ifdef H5
-			this.isShow = false;
+			this.isShow_H5 = false;
 			//#endif
 
+			console.log('h 3');
 			//SubmitisBtnClick判断是否为按钮点击
 			if (isBtnClick) return;
 
 			//非按钮点击则重置已选择的
 			this.dateFlag = {};
 			this.choice = '';
-			this.dayCount = 1;
+			this.dayCount = this.bak_dayCount;
 			this.dayCount2 = '共' + this.dayCount + '晚';
 			//
 			this.date = JSON.parse(JSON.stringify(this.bak_date));
 			this.weeks = JSON.parse(JSON.stringify(this.bak_weeks));
 			this.choiceDate = JSON.parse(JSON.stringify(this.bak_choiceDate));
 			this.choiceDateArr = JSON.parse(JSON.stringify(this.bak_choiceDateArr));
+			console.log('h 4');
 		},
 		setData: function(obj) {
 			let that = this;
@@ -376,11 +398,16 @@ export default {
 							if (yearList[i] == year && mList[j] == month) {
 								//判断当年当月
 								if (k + 1 >= day) {
+									if (k + 1 == day) {
+										let date = new Date(yearList[i] + '/' + mList[j] + '/' + (k + 1));
+										let weekss = date.getDay(); //获取每个月第一天是周几
+										weeks.push(weekss);
+									}
 									nowData = {
 										year: yearList[i],
 										month: mList[j],
 										act: {
-											subject,
+											subject: subject ? subject : '',
 											none,
 											tip: '',
 											defaultStr: 0
@@ -389,23 +416,24 @@ export default {
 										date: yearList[i] + '' + mList[j] + days,
 										selected,
 										re: yearList[i] + '-' + mList[j] + '-' + days,
-										dateTime: thisDateTime
+										dateTime: thisDateTime,
+										week: this.getWeek(weeks, month, mList[j], k + 1)
 									};
 									dataMonth.push(nowData);
-									if (k + 1 == day) {
-										let date = new Date(yearList[i] + '/' + mList[j] + '/' + (k + 1));
-										let weekss = date.getDay(); //获取每个月第一天是周几
-										weeks.push(weekss);
-									}
 								}
 							} else {
+								if (k == 0) {
+									let date = new Date(yearList[i] + '/' + mList[j] + '/' + (k + 1));
+									let weekss = date.getDay(); //获取每个月第一天是周几
+									weeks.push(weekss);
+								}
 								//其他情况
 								nowData = {
 									//组装自己需要的数据
 									year: yearList[i],
 									month: mList[j],
 									act: {
-										subject,
+										subject: subject ? subject : '',
 										none,
 										tip: '',
 										defaultStr: 0
@@ -414,14 +442,10 @@ export default {
 									date: yearList[i] + '' + mList[j] + days,
 									selected,
 									re: yearList[i] + '-' + mList[j] + '-' + days,
-									dateTime: thisDateTime
+									dateTime: thisDateTime,
+									week: this.getWeek(weeks, month, mList[j], k + 1)
 								};
 								dataMonth.push(nowData);
-								if (k == 0) {
-									let date = new Date(yearList[i] + '/' + mList[j] + '/' + (k + 1));
-									let weekss = date.getDay(); //获取每个月第一天是周几
-									weeks.push(weekss);
-								}
 							}
 						} else {
 							break;
@@ -450,13 +474,34 @@ export default {
 				dataAll2[1][0].act.defaultStr = 1;
 				this.choiceDate.push(dataAll2[1][0]);
 			}
-			console.log(dataAll2, weeks, this.today, this.tomorrow, this.afterTomorrow);
+			// console.log(dataAll2, weeks, this.today, this.tomorrow, this.afterTomorrow);
 			this.date = dataAll2;
 			this.weeks = weeks;
 			this.choiceDate = this.choiceDate;
 			this.choiceDateArr = this.choiceDate;
-
-			console.log(this.choiceDate);
+			// console.log(this.choiceDate);
+		},
+		getWeek(weeks, firstMonth, curMonth, day) {
+			/**
+			 * 获取周几
+			 * weeks 每个月第一天周几
+			 * firstMonth 当前第一个月是哪个朋
+			 * curMonth 当前要取的是哪个月
+			 * day 要取哪一天的星期
+			 */
+			if (!this.tmpWeekArr[curMonth]) {
+				var firstDay = weeks[curMonth - firstMonth];
+				if (curMonth == firstMonth) firstDay--; //第一个月的第一天要减一天。。。
+				var tmpArr = [];
+				for (let i = firstDay; i < this.weekNameArr.length; i++) {
+					tmpArr.push(this.weekNameArr[i]);
+				}
+				tmpArr = [...tmpArr, ...this.weekNameArr];
+				//缓存一下，就不必每次再取了
+				this.tmpWeekArr[curMonth] = tmpArr;
+			}
+			var index = day % 7 || 7;
+			return this.tmpWeekArr[curMonth][index - 1];
 		},
 		selectday: function(e) {
 			var indexs = e.currentTarget.dataset.indexs;
@@ -547,7 +592,7 @@ export default {
 				} else {
 					this.dateFlag = {};
 					this.choice = true;
-					console.log('count', count);
+					// console.log('count', count);
 					this.dayCount = count + 1;
 					this.dayCount2 = '共' + (count + 1) + '晚';
 				}
@@ -632,7 +677,7 @@ uni-view {
 		transform: translateY(-50%);
 
 		//
-		::before {
+		&::before {
 			content: '';
 			width: 34upx;
 			height: 1upx;
@@ -643,7 +688,7 @@ uni-view {
 			transform: rotate(45deg);
 		}
 
-		::after {
+		&::after {
 			content: '';
 			width: 1upx;
 			height: 34upx;
@@ -665,6 +710,7 @@ uni-view {
 .calendar-layer {
 	position: fixed;
 	bottom: -100%;
+	left: 0;
 	height: 0;
 	width: 100%;
 	overflow: hidden;
