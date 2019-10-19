@@ -79,8 +79,20 @@ export default {
 ![效果图](https://zhangdaren.github.io/uni-app-date-picker/static/date-picker/gif.gif)
    
 
+## TODO
+* 选中的日期可能会被挡掉
+* 语种
+* nvue版本
+* 历史时间选择(优先级低)
+
 ---
 ## 更新历史说明：   
+## v1.0.17(20191020)   
+* 新增动态调整初始日期，调整startDate和endDate绑定的值即可，示例有做描述   
+   
+## v1.0.16(20190928)   
+* 修复H5确认按钮被覆盖的bug   
+   
 ## v1.0.15(20190824)   
 * 新增singleDate模式，可以选择单个日期，赋值使用startDate，后面会支持选择今天之前的日期(架构需要做大的调整才行)
 * 修复非今年的星期有误的bug   

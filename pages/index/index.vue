@@ -4,7 +4,9 @@
 
 		<!-- 组件模式(有界面)  -->
 		<text class="text-center subTitle">1.组件模式(有界面)</text>
-		<calendar @change="change" startDate="2019-06-01" endDate="2019-06-05" :daysCount="daysCount"></calendar>
+		<calendar @change="change" :startDate="initStartDate" :endDate="initEndDate" :daysCount="daysCount"></calendar>
+		<button class="btn" @tap="setRandomDate()">随机设置日期</button>
+
 
 		<!-- 组件模式(有界面)  -->
 		<text class="text-center subTitle">2.组件模式(有界面)-->单个日期选择</text>
@@ -26,12 +28,14 @@
 	export default {
 		data() {
 			return {
-				beginDate: '2019-05-06',
-				endDate: '2019-05-07',
 				showCaledar: false,
 				dateStr: '',
 				daysCount: 365,
 				singleDate: true,
+
+				//初始日期
+				initStartDate: '2019-12-06',
+				initEndDate: '2019-12-07',
 			};
 		},
 		components: {
@@ -69,6 +73,10 @@
 				dayCount
 			}) {
 				console.log(choiceDate, dayCount);
+			},
+			setRandomDate() {
+				this.initStartDate = '2019-12-' + parseInt(Math.random() * 29 + 1);
+				this.initEndDate = '2019-12-31';
 			}
 		}
 	};

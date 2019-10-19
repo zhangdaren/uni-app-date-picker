@@ -163,7 +163,15 @@
 		watch: {
 			show: function(newVal, oldVal) {
 				this.isShow_NoH5 ? this.hideCalendar() : this.showCalendar();
-			}
+			},
+			startDate: function(newVal, oldVal) {
+				console.log("--startDate")
+				this.dateData();
+			},
+			endDate: function(newVal, oldVal) {
+				console.log("--endDate")
+				this.dateData();
+			},
 		},
 		methods: {
 			//补0
@@ -723,7 +731,7 @@
 				 * 2.dayCount 共多少晚
 				 */
 				this.$emit('change', {
-					choiceDate: this.singleDate ? this.choiceDate[0] : this.choiceDate,  //如果是单个日期方式，则只导出数组第一个
+					choiceDate: this.singleDate ? this.choiceDate[0] : this.choiceDate, //如果是单个日期方式，则只导出数组第一个
 					dayCount: this.dayCount
 				});
 			}
@@ -850,6 +858,7 @@
 		// position: absolute;
 		// height:300upx;
 		width: 100%;
+		height: 100%;
 		// bottom: 0upx;
 		display: flex;
 		flex: 1;
