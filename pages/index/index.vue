@@ -7,30 +7,30 @@
 		<calendar @change="change" :startDate="initStartDate" :endDate="initEndDate" :daysCount="daysCount"></calendar>
 		<button class="btn" @tap="setRandomDate()">随机设置日期</button>
 
-
 		<!-- 组件模式(有界面)  -->
 		<text class="text-center subTitle">2.组件模式(有界面)-->单个日期选择</text>
-		<calendar @change="change_single" startDate="2019-06-01" :daysCount="daysCount" :singleDate="singleDate"></calendar>
+		<calendar @change="change_single" startDate="2019-11-07" :daysCount="daysCount" :singleDate="singleDate"></calendar>
+
 
 		<!-- 弹窗模式(无界面) -->
 		<text class="text-center subTitle">3.弹窗模式(无界面)</text>
 		<text class="text-center desc">需要设置modal为true(默认为false), 通过show来控制隐藏还是显示</text>
 		<calendar @change="change2" :modal="true" :show="showCaledar"></calendar>
 		<text class="text-center dateStr">{{ dateStr }}</text>
-		<button class="btn" @tap="showCaledar = !showCaledar">显示/隐藏</button>
-
+		<button class="btn" @tap="showCaledar = !showCaledar">显示/隐藏{{showCaledar}}</button>
+		
 	</view>
 </template>
 
 <script>
-	import calendar from '../../components/date-picker/date-picker.vue';
+	import calendar from '../../components/date-picker/date-picker';
 
 	export default {
 		data() {
 			return {
 				showCaledar: false,
 				dateStr: '',
-				daysCount: 365,
+				daysCount: 130,
 				singleDate: true,
 
 				//初始日期
