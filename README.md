@@ -78,8 +78,8 @@ export default {
 ## 效果图：
 ![效果图](https://zhangdaren.github.io/uni-app-date-picker/static/date-picker/gif.gif)
    
-
-## TODO
+   
+   ## TODO
 * 选中的日期可能会被挡掉
 * 语种
 * nvue版本
@@ -90,6 +90,9 @@ export default {
 
 ---
 ## 更新历史说明：   
+## v1.0.20(20201029)   
+* 修复2021没有假日数据出错的问题
+
 ## v1.0.19(20200110)   
 * 增加法定节假日和补班的显示，替换之前的假日显示，更符合国情
 * 优化dayCount为从今天开始算起 

@@ -157,6 +157,11 @@ export default {
 						'1008': true
 					},
 					workday: { '0119': true, '0201': true, '0426': true, '0509': true, '0628': true, '0927': true, '1010': true }
+				},
+				y2021:{
+					holidayName:{},
+					holiday:{},
+					workday:{},
 				}
 			},
 			haveOrder: [],
@@ -263,8 +268,8 @@ export default {
 		},
 		getDayName(year, data) {
 			let name = data.day;
-			let yearData = this.holidayList['y' + year];
-			let holidayName = yearData['holidayName'];
+			let yearData = this.holidayList['y' + year] || {};
+			let holidayName = yearData['holidayName'] || "";
 			var monthAndDay = data.month + '' + data.day;
 			if (holidayName[monthAndDay]) {
 				name = holidayName[monthAndDay];
